@@ -28,4 +28,9 @@ class Modelo extends Model
         ];
     }
 
+    public function marca(){
+        //Um modelo pertence a UMA marca
+        return $this->belongsTo('App\Models\Marca');
+    }
+
 }
