@@ -21,13 +21,22 @@ class ModeloController extends Controller
      */
     public function index(Request $request)
     {
-        $modelos = array();
 
         if ($request->has('atributos_marca')) {
             $atributos_marca = $request->atributos_marca;
             $modelos = $this->modelo->with('marca:id,' . $atributos_marca);
         } else {
             $modelos = $this->modelo->with('marca');
+        }
+
+        if ($request->has('filtro')) {
+            $filtros = explode(';', $request->filtro);
+            foreach ($filtros as $key => $condicao) {
+
+                $c = explode(':', $condicao);
+                $modelos = $modelos->where($c[0], $c[1], $c[2]);
+            }
+
         }
 
         if ($request->has('atributos')) {
