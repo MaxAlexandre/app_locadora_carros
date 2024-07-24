@@ -32,7 +32,7 @@
                 <!--Início do card de listagem de marcas-->
                 <card-component titulo="Relação de marcas.">
                     <template v-slot:conteudo>
-                        <table-component></table-component>
+                        <table-component :dados="marcas" :titulos="['id','nome','imagem']"></table-component>
                     </template>
 
                     <template v-slot:rodape>
@@ -47,8 +47,10 @@
         </div>
         <modal-component id="modalMarca" titulo="Adicionar marca">
             <template v-slot:alertas>
-                <alert-component tipo="success" :detalhes="transacaoDetalhes" titulo="Cadastro realizado com sucesso." v-if="transacaoStatus == 'adicionado'" ></alert-component>
-                <alert-component tipo="danger"  :detalhes="transacaoDetalhes" titulo="Erro ao tentar cadastrar a marca." v-if="transacaoStatus == 'erro'"></alert-component>
+                <alert-component tipo="success" :detalhes="transacaoDetalhes" titulo="Cadastro realizado com sucesso."
+                                 v-if="transacaoStatus == 'adicionado'"></alert-component>
+                <alert-component tipo="danger" :detalhes="transacaoDetalhes" titulo="Erro ao tentar cadastrar a marca."
+                                 v-if="transacaoStatus == 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
                 <div class="form-group">
@@ -96,10 +98,30 @@ export default {
             nomeMarca: '',
             arquivoImagem: [],
             transacaoStatus: '',
-            transacaoDetalhes: {}
+            transacaoDetalhes: {},
+            marcas:[]
         }
     },
     methods: {
+        carregarLista() {
+
+            let config = {
+                headers: {
+
+                    'Accept': 'application/json',
+                    'Authorization': this.token
+                }
+            }
+
+            axios.get(this.urlBase,config)
+                .then(response => {
+                    this.marcas = response.data
+
+                })
+                .catch(errors => {
+
+                })
+        },
         carregarImagem(e) {
             this.arquivoImagem = e.target.files
         },
@@ -132,6 +154,9 @@ export default {
                     console.log(errors)
                 })
         }
+    },
+    mounted() {
+        this.carregarLista()
     }
 }
 </script>
