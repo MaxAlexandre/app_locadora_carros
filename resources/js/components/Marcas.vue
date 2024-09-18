@@ -10,21 +10,23 @@
                                 <input-container-component titulo="ID" id="inputId" id-help="idHelp"
                                                            texto-ajuda="Opcional. Informe o ID da marca.">
                                     <input type="number" class="form-control" id="inputId" aria-describedby="idHelp"
-                                           placeholder="ID">
+                                           placeholder="ID" v-model="busca.id">
                                 </input-container-component>
                             </div>
                             <div class="col mb-3">
                                 <input-container-component titulo="Nome da marca" id="inputNome" id-help="nomeHelp"
                                                            texto-ajuda="Opcional. Informe o nome da marca.">
                                     <input type="text" class="form-control" id="inputNome" aria-describedby="nomeHelp"
-                                           placeholder="Nome da marca">
+                                           placeholder="Nome da marca" v-model="busca.nome">
                                 </input-container-component>
                             </div>
                         </div>
                     </template>
 
                     <template v-slot:rodape>
-                        <button type="submit" class="btn btn-primary btn-sm float-right">Pesquisar</button>
+                        <button type="submit" class="btn btn-primary btn-sm float-right" @click="pesquisar()">
+                            Pesquisar
+                        </button>
                     </template>
                 </card-component>
                 <!-- fim do card de busca-->
@@ -34,6 +36,9 @@
                     <template v-slot:conteudo>
                         <table-component
                             :dados="marcas.data"
+                            :visualizar="true"
+                            :atualizar="true"
+                            :remover="true"
                             :titulos="{
                                 id: {titulo: 'ID', tipo: 'texto'},
                                 nome: {titulo: 'Nome', tipo: 'texto'},
@@ -118,21 +123,52 @@ export default {
     data() {
         return {
             urlBase: 'http://localhost:8000/api/v1/marca',
+            urlPaginacao: '',
+            urlFiltro: '',
             nomeMarca: '',
             arquivoImagem: [],
             transacaoStatus: '',
             transacaoDetalhes: {},
-            marcas: {data: []}
+            marcas: {data: []},
+            busca: {id: '', nome: ''}
         }
     },
     methods: {
+        pesquisar() {
+            let filtro = ''
+
+            for (let chave in this.busca) {
+
+                if (this.busca[chave]) {
+
+                    if (filtro !== '') {
+                        filtro += ";"
+                    }
+
+                    filtro += chave + ':like:' + this.busca[chave]
+                }
+            }
+
+            if (filtro !== '') {
+                this.urlPaginacao = 'page=1'
+                this.urlFiltro = '&filtro=' + filtro
+            } else {
+                this.urlFiltro = ''
+            }
+
+            this.carregarLista()
+
+        },
         paginacao(l) {
-            if(l.url){
-                this.urlBase = l.url //ajustando a url de consulta com o parâmetro de página
+            if (l.url) {
+                //this.urlBase = l.url //ajustando a url de consulta com o parâmetro de página
+                this.urlPaginacao = l.url.split('?')[1]
                 this.carregarLista() //requisitando novamente os dados para nossa API
             }
         },
         carregarLista() {
+
+            let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
 
             let config = {
                 headers: {
@@ -142,7 +178,7 @@ export default {
                 }
             }
 
-            axios.get(this.urlBase, config)
+            axios.get(url, config)
                 .then(response => {
                     this.marcas = response.data
 
