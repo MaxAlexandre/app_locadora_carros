@@ -3,22 +3,25 @@
         <thead>
         <tr>
             <th scope="col" v-for="t, key in titulos" :key="key">{{ t.titulo }}</th>
-            <th v-if="visualizar || atualizar || remover"></th>
+            <th v-if="visualizar.visivel || atualizar || remover.visivel"></th>
         </tr>
         </thead>
         <tbody>
         <tr v-for="obj, chave in dadosFiltrados" :key="chave">
             <td v-for="valor, chaveValor in obj" :key="chaveValor">
-                <span v-if="titulos[chaveValor].tipo == 'texto'">{{valor}}</span>
-                <span v-if="titulos[chaveValor].tipo == 'data'">{{valor}}</span>
+                <span v-if="titulos[chaveValor].tipo == 'texto'">{{ valor }}</span>
+                <span v-if="titulos[chaveValor].tipo == 'data'">{{ valor }}</span>
                 <span v-if="titulos[chaveValor].tipo == 'imagem'">
                     <img :src="'/storage/'+valor" width="30" height="30">
                 </span>
             </td>
-            <td v-if="visualizar || atualizar || remover">
-                <button v-if="visualizar" class="btn btn-outline-primary btn-sm">Visualizar</button>
+            <td v-if="visualizar.visivel || atualizar || remover.visivel">
+                <button v-if="visualizar.visivel" class="btn btn-outline-primary btn-sm"
+                        :data-toggle="visualizar.dataToggle" :data-target="visualizar.dataTarget"
+                        @click="setStore(obj)">Visualizar
+                </button>
                 <button v-if="atualizar" class="btn btn-outline-primary btn-sm">Atualizar</button>
-                <button v-if="remover" class="btn btn-outline-danger btn-sm">Remover</button>
+                <button v-if="remover.visivel" class="btn btn-outline-danger btn-sm" :data-toggle="remover.dataToggle" :data-target="remover.dataTarget" @click="setStore(obj)">Remover</button>
             </td>
         </tr>
         </tbody>
@@ -27,7 +30,12 @@
 
 <script>
 export default {
-    props: ['dados', 'titulos', 'visualizar', 'atualizar','remover'],
+    props: ['dados', 'titulos', 'visualizar', 'atualizar', 'remover'],
+    methods: {
+        setStore(obj){
+            this.$store.state.item = obj
+        }
+    },
     computed: {
         dadosFiltrados() {
             let campos = Object.keys(this.titulos)
