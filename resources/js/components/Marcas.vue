@@ -110,20 +110,20 @@
         <modal-component id="modalMarcaVisualizar" titulo="Visualizar marca.">
             <template v-slot:alertas></template>
             <template v-slot:conteudo>
-                <input-container-component titulo="ID" >
+                <input-container-component titulo="ID">
                     <input type="text" class="form-control" :value="$store.state.item.id" disabled>
                 </input-container-component>
 
-                <input-container-component titulo="Nome da marca" >
+                <input-container-component titulo="Nome da marca">
                     <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
                 </input-container-component>
 
-                <input-container-component titulo="Imagem" >
+                <input-container-component titulo="Imagem">
                     <br>
                     <img :src="'storage/'+$store.state.item.imagem" v-if="$store.state.item.imagem">
                 </input-container-component>
 
-                <input-container-component titulo="Data de criação" >
+                <input-container-component titulo="Data de criação">
                     <input type="text" class="form-control" :value="$store.state.item.created_at" disabled>
                 </input-container-component>
             </template>
@@ -142,17 +142,18 @@
                                  v-if="transacaoStatus == 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
-                <input-container-component titulo="ID" >
+                <input-container-component titulo="ID">
                     <input type="text" class="form-control" :value="$store.state.item.id" disabled>
                 </input-container-component>
 
-                <input-container-component titulo="Nome da marca" >
+                <input-container-component titulo="Nome da marca">
                     <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
                 </input-container-component>
 
             </template>
             <template v-slot:rodape>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-danger" @click="remover()">Remover</button>
             </template>
         </modal-component>
         <!--Fim do modal de remoção de marcas-->
@@ -262,7 +263,7 @@ export default {
                     this.transacaoDetalhes = {
                         mensagem: 'ID do registro: ' + response.data.id
                     }
-                    console.log(response)
+                    this.carregarLista()
                 })
                 .catch(errors => {
                     this.transacaoStatus = 'erro'
@@ -272,6 +273,35 @@ export default {
                     }
 
                 })
+        },
+        remover() {
+            let confirmacao = confirm('Tem certeza que deseja remover esse registro?')
+
+            if (!confirmacao) {
+                return false;
+            }
+
+            let formData = new FormData();
+            formData.append('_method', 'delete')
+
+            let config = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': this.token
+                }
+            }
+
+            let url = this.urlBase + '/' + this.$store.state.item.id
+
+            axios.post(url, formData, config)
+                .then(response => {
+                    console.log('registro removido com sucesso', response)
+                    this.carregarLista()
+                })
+                .catch(errors => {
+                    console.log('Houve um erro na tentativa de remoção do registro', errors.response)
+                })
+
         }
     },
     mounted() {
